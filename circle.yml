@@ -1,0 +1,24 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  override:
+    - docker info
+  pre:
+    - sudo apt-get update && sudo apt-get install jq
+
+test:
+  override:
+    - echo "skipping tests"
+
+deployment:
+  hub:
+    branch: master
+    commands:
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASSWORD
+      - docker build -t create-react-app-deploy .
+      - docker tag create-react-app-deploy joseangelmr/create-react-app-deploy:`jq -r '.["version"]' package.json`
+      - docker tag create-react-app-deploy joseangelmr/create-react-app-deploylatest
+      - docker push joseangelmr/create-react-app-deploy:`jq -r '.["version"]' package.json`
+      - docker push joseangelmr/create-react-app-deploy:latest
